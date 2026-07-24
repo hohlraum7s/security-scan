@@ -1,0 +1,80 @@
+# values-prometheus.yaml - Production Alertmanager & Prometheus Configuration for Trivy Security Stack
+
+# 1. Alertmanager Configuration & Webhook/Email Routing
+alertmanager:
+  enabled: true
+  config:
+    global:
+      smtp_smarthost: 'smtp.internal.domain:25'
+      smtp_from: 'trivy-alerts@internal.domain'
+      smtp_require_tls: false
+
+    # Default Alert Routing Logic
+    route:
+      group_by: ['namespace', 'alertname', 'severity']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: 'security-email-default'
+      routes:
+        # Route CRITICAL security alerts to ChatOps (Mattermost/Webhook)
+        - match:
+            severity: critical
+          receiver: 'chatops-webhook'
+          continue: true
+
+        # Route CRITICAL security alerts to Security Email
+        - match:
+            severity: critical
+          receiver: 'security-email-default'
+
+        # Route Config Audit warnings to DevOps Team
+        - match:
+            team: devops
+          receiver: 'devops-email'
+
+    # Notification Receivers
+    receivers:
+      - name: 'chatops-webhook'
+        webhook_configs:
+          - url: 'http://mattermost.internal.domain/hooks/trivy-security-alerts'
+            send_resolved: true
+
+      - name: 'security-email-default'
+        email_configs:
+          - to: 'secops@internal.domain'
+            send_resolved: true
+
+      - name: 'devops-email'
+        email_configs:
+          - to: 'devops@internal.domain'
+            send_resolved: true
+
+# 2. Prometheus Engine Configuration
+prometheus:
+  enabled: true
+  prometheusSpec:
+    # Ensure Prometheus automatically discovers all ServiceMonitors & PrometheusRules
+    serviceMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    
+    # Retention Period for Security Metrics
+    retention: 30d
+
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+
+# 3. Grafana Integration & Sidecar Dashboard Provider
+grafana:
+  enabled: true
+  adminPassword: "admin" # Replace with secure secret in production
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"

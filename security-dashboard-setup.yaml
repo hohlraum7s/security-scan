@@ -1,0 +1,132 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: trivy-operator
+  namespace: trivy-system
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: trivy-operator
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trivy-operator-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  trivy-operator-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "gridPos": { "h": 5, "w": 12, "x": 0, "y": 0 },
+          "id": 1,
+          "title": "Total Critical Vulnerabilities",
+          "type": "stat",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "sum(trivy_image_vulnerabilities{severity=\"Critical\"}) or vector(0)",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "fixedColor": "red", "mode": "fixed" }
+            }
+          }
+        },
+        {
+          "gridPos": { "h": 5, "w": 12, "x": 12, "y": 0 },
+          "id": 2,
+          "title": "Workloads Affected by Critical Vulnerabilities",
+          "type": "stat",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "count(trivy_image_vulnerabilities{severity=\"Critical\"} > 0) or vector(0)",
+              "refId": "A"
+            }
+          ],
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "fixedColor": "dark-red", "mode": "fixed" }
+            }
+          }
+        },
+        {
+          "gridPos": { "h": 14, "w": 24, "x": 0, "y": 5 },
+          "id": 3,
+          "title": "Critical Workloads & Container Images Summary",
+          "type": "table",
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "trivy_image_vulnerabilities{severity=\"Critical\"} > 0",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": { "Time": true, "name": true, "image_digest": true, "image_registry": true, "container_name": true, "severity": true },
+                "indexByName": {
+                  "namespace": 0,
+                  "resource_kind": 1,
+                  "resource_name": 2,
+                  "image_repository": 3,
+                  "image_tag": 4,
+                  "Value": 5
+                },
+                "renameByName": {
+                  "Value": "Critical Vulnerability Count",
+                  "image_repository": "Container Image",
+                  "image_tag": "Tag",
+                  "namespace": "Namespace",
+                  "resource_kind": "Kind",
+                  "resource_name": "Workload Name"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": ["security", "trivy", "critical"],
+      "time": { "from": "now-1h", "to": "now" },
+      "title": "Critical Vulnerability Security Dashboard",
+      "uid": "trivy-critical-overview"
+    }

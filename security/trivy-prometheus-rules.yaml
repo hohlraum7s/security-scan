@@ -1,0 +1,42 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: trivy-vulnerability-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+    role: alert-rules
+spec:
+  groups:
+  - name: trivy-security.rules
+    rules:
+    - alert: TrivyCriticalVulnerabilityDetected
+      expr: sum by (namespace, resource_kind, resource_name, image_repository, image_tag) (trivy_image_vulnerabilities{severity="Critical"}) > 0
+      for: 5m
+      labels:
+        severity: critical
+        team: security
+      annotations:
+        summary: "Critical vulnerability detected in {{ $labels.namespace }}/{{ $labels.resource_name }}"
+        description: "Workload {{ $labels.resource_kind }} {{ $labels.resource_name }} in namespace {{ $labels.namespace }} is running image {{ $labels.image_repository }}:{{ $labels.image_tag }} which contains {{ $value }} Critical vulnerabilities."
+        runbook_url: "https://harbor.internal.domain"
+
+    - alert: TrivyHighVulnerabilityDetected
+      expr: sum by (namespace, resource_kind, resource_name, image_repository, image_tag) (trivy_image_vulnerabilities{severity="High"}) > 5
+      for: 15m
+      labels:
+        severity: warning
+        team: security
+      annotations:
+        summary: "High vulnerability count threshold exceeded in {{ $labels.namespace }}/{{ $labels.resource_name }}"
+        description: "Workload {{ $labels.resource_kind }} {{ $labels.resource_name }} in namespace {{ $labels.namespace }} has {{ $value }} High severity vulnerabilities."
+
+    - alert: TrivyConfigAuditCriticalCheckFailed
+      expr: sum by (namespace, resource_kind, resource_name) (trivy_resource_configaudits) > 5
+      for: 10m
+      labels:
+        severity: warning
+        team: devops
+      annotations:
+        summary: "Critical K8s security context check failed for {{ $labels.namespace }}/{{ $labels.resource_name }}"
+        description: "Workload {{ $labels.resource_name }} in {{ $labels.namespace }} failed {{ $value }} security configuration checks (e.g. running as root, missing read-only filesystem)."
