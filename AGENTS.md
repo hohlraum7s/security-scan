@@ -19,25 +19,38 @@ Key System Constraints:
 
 ```text
 /home/jakob/Code/security-scan/
-├── AGENTS.md                              # This guidance file for agents & developers
-├── .gitignore                             # Git ignore specifications
-├── security-dashboard-setup.yaml          # ServiceMonitor & Grafana Dashboard ConfigMap
-├── security/
-│   ├── README.md                          # Master project plan index & navigation
-│   ├── 01-directives.md                   # Directives & zero-outbound governance
-│   ├── 02-prerequisites.md                # System prerequisites (RKE2, Harbor, Nexus, Diode)
-│   ├── 03-requirements.md                # Functional & non-functional requirements
-│   ├── 04-baseline-architecture.md        # Technical baseline (Helm & ArgoCD specs)
-│   ├── 05-deployment-guide.md             # Execution playbook & diode sync script
-│   ├── 06-admin-monitoring-plan.md        # Multi-tiered admin monitoring framework (Headlamp/Grafana/Alertmanager)
-│   ├── 07-prometheus-alertmanager-config.md # Prometheus & Alertmanager setup guide
-│   ├── 08-master-requirements-checklist.md # Consolidated master requirements matrix
-│   ├── 09-argocd-helm-deployment-guide.md # ArgoCD Helm deployment guide
-│   ├── values-prometheus.yaml             # Production Helm values for Prometheus & Alertmanager
-│   ├── trivy-prometheus-rules.yaml        # PrometheusRule CRD for security alerts
-│   ├── cve-api-deployment.yaml            # In-cluster Critical CVE API server deployment
-│   ├── generate-report.py                 # CLI report generator for deduplicated CVEs
-│   └── cve-server.py                      # Standalone Python CVE API server
+├── AGENTS.md                              # Guidance file for agents & developers
+├── README.md                              # Master project overview
+├── trivy/                                 # Trivy Operator & Scanner module
+│   ├── README.md                          # Module quickstart & overview
+│   ├── manifests/                         # Declarative K8s manifests & Helm values
+│   │   ├── trivy-namespace.yaml
+│   │   ├── values-trivy-minikube-airgap.yaml
+│   │   ├── trivy-prometheus-rules.yaml
+│   │   ├── cve-api-deployment.yaml
+│   │   └── security-dashboard-setup.yaml
+│   └── scripts/                           # Reporting & REST API scripts
+│       ├── cve-server.py
+│       └── generate-report.py
+├── renovate/                              # Renovate Bot air-gapped sync module
+│   ├── README.md                          # Air-gap sync documentation
+│   ├── config/                            # Renovate configuration file
+│   │   └── renovate.json
+│   └── scripts/                           # DMZ diode sync script
+│       └── dmz-renovate-sync.sh
+├── prometheus/                            # Prometheus & Alertmanager configs
+│   └── values-prometheus.yaml
+└── docs/                                  # Architecture & planning documentation
+    ├── README.md                          # Master documentation index
+    ├── 01-directives.md
+    ├── 02-prerequisites.md
+    ├── 03-requirements.md
+    ├── 04-baseline-architecture.md
+    ├── 05-deployment-guide.md
+    ├── 06-admin-monitoring-plan.md
+    ├── 07-prometheus-alertmanager-config.md
+    ├── 08-master-requirements-checklist.md
+    └── 09-argocd-helm-deployment-guide.md
 ```
 
 ---
@@ -71,8 +84,8 @@ kubectl get pods -n trivy-system
 kubectl get vulnerabilityreports -A -o wide
 
 # Execute the CLI report generator
-python3 security/generate-report.py
+python3 trivy/scripts/generate-report.py
 
 # Validate YAML syntax on Kubernetes manifests
-kubectl apply --dry-run=client -f security-dashboard-setup.yaml
+kubectl apply --dry-run=client -f trivy/manifests/security-dashboard-setup.yaml
 ```

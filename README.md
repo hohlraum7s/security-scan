@@ -51,8 +51,26 @@ This security stack operates natively inside an air-gapped environment with **ze
 .
 ├── README.md                              # Main repository overview and quick start
 ├── AGENTS.md                              # Context and guidelines for developers & AI subagents
-├── security-dashboard-setup.yaml          # ServiceMonitor & Grafana Dashboard ConfigMap
-└── security/
+├── trivy/                                 # Trivy Operator & Scanner module
+│   ├── README.md                          # Trivy quickstart & documentation
+│   ├── manifests/                         # Declarative K8s manifests & Helm values
+│   │   ├── trivy-namespace.yaml
+│   │   ├── values-trivy-minikube-airgap.yaml
+│   │   ├── trivy-prometheus-rules.yaml
+│   │   ├── cve-api-deployment.yaml
+│   │   └── security-dashboard-setup.yaml
+│   └── scripts/                           # Reporting & REST API scripts
+│       ├── cve-server.py
+│       └── generate-report.py
+├── renovate/                              # Renovate Bot air-gapped sync module
+│   ├── README.md                          # Air-gap sync documentation
+│   ├── config/                            # Renovate configuration file
+│   │   └── renovate.json
+│   └── scripts/                           # DMZ diode sync script
+│       └── dmz-renovate-sync.sh
+├── prometheus/                            # Prometheus & Alertmanager configs
+│   └── values-prometheus.yaml
+└── docs/                                  # Architecture & planning documentation
     ├── README.md                          # Master project plan index & document sitemap
     ├── 01-directives.md                   # Business goals, scope, and zero-outbound governance
     ├── 02-prerequisites.md                # Infrastructure, RKE2, Harbor, Nexus & Diode specs
@@ -62,12 +80,7 @@ This security stack operates natively inside an air-gapped environment with **ze
     ├── 06-admin-monitoring-plan.md        # Multi-tiered admin monitoring framework
     ├── 07-prometheus-alertmanager-config.md # Prometheus & Alertmanager configuration guide
     ├── 08-master-requirements-checklist.md # Master requirements checklist and matrix
-    ├── 09-argocd-helm-deployment-guide.md # ArgoCD Helm deployment guide
-    ├── values-prometheus.yaml             # Production Helm values for Prometheus & Alertmanager
-    ├── trivy-prometheus-rules.yaml        # PrometheusRule CRD for security alerts
-    ├── cve-api-deployment.yaml            # In-cluster Critical CVE API server deployment
-    ├── generate-report.py                 # CLI report generator for deduplicated CVEs
-    └── cve-server.py                      # Standalone Python CVE API server
+    └── 09-argocd-helm-deployment-guide.md # ArgoCD Helm deployment guide
 ```
 
 ---
@@ -112,14 +125,14 @@ kubectl apply -f security/trivy-prometheus-rules.yaml -n monitoring
 
 ## 📄 Documentation Sitemap
 
-* **[Directives & Governance](file:///home/jakob/Code/security-scan/security/01-directives.md)**: Zero-outbound internet rules and architecture principles.
-* **[Prerequisites Specification](file:///home/jakob/Code/security-scan/security/02-prerequisites.md)**: Infrastructure, Harbor, Nexus, and data diode pipeline requirements.
-* **[Baseline Architecture](file:///home/jakob/Code/security-scan/security/04-baseline-architecture.md)**: Offline Helm values and ArgoCD manifest templates.
-* **[Deployment Guide](file:///home/jakob/Code/security-scan/security/05-deployment-guide.md)**: Execution playbook for diode sync and verification.
-* **[Admin Monitoring Plan](file:///home/jakob/Code/security-scan/security/06-admin-monitoring-plan.md)**: Multi-tiered admin monitoring featuring Headlamp, Grafana, and Alertmanager.
-* **[Prometheus & Alertmanager Config](file:///home/jakob/Code/security-scan/security/07-prometheus-alertmanager-config.md)**: Setup guide for automated alert routing.
-* **[Master Requirements Matrix](file:///home/jakob/Code/security-scan/security/08-master-requirements-checklist.md)**: Master setup requirements checklist.
-* **[ArgoCD Helm Deployment Guide](file:///home/jakob/Code/security-scan/security/09-argocd-helm-deployment-guide.md)**: Step-by-step ArgoCD GitOps deployment guide.
+* **[Directives & Governance](file:///home/jakob/Code/security-scan/docs/01-directives.md)**: Zero-outbound internet rules and architecture principles.
+* **[Prerequisites Specification](file:///home/jakob/Code/security-scan/docs/02-prerequisites.md)**: Infrastructure, Harbor, Nexus, and data diode pipeline requirements.
+* **[Baseline Architecture](file:///home/jakob/Code/security-scan/docs/04-baseline-architecture.md)**: Offline Helm values and ArgoCD manifest templates.
+* **[Deployment Guide](file:///home/jakob/Code/security-scan/docs/05-deployment-guide.md)**: Execution playbook for diode sync and verification.
+* **[Admin Monitoring Plan](file:///home/jakob/Code/security-scan/docs/06-admin-monitoring-plan.md)**: Multi-tiered admin monitoring featuring Headlamp, Grafana, and Alertmanager.
+* **[Prometheus & Alertmanager Config](file:///home/jakob/Code/security-scan/docs/07-prometheus-alertmanager-config.md)**: Setup guide for automated alert routing.
+* **[Master Requirements Matrix](file:///home/jakob/Code/security-scan/docs/08-master-requirements-checklist.md)**: Master setup requirements checklist.
+* **[ArgoCD Helm Deployment Guide](file:///home/jakob/Code/security-scan/docs/09-argocd-helm-deployment-guide.md)**: Step-by-step ArgoCD GitOps deployment guide.
 
 ---
 
