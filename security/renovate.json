@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "schedule": ["before 4am on Monday"],
+  "timezone": "UTC",
+  "labels": ["dependencies", "renovate", "airgap-sync"],
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "pinDigests": false,
+      "commitMessageSuffix": "[airgap-sync-pending]"
+    }
+  ],
+  "postUpgradeTasks": {
+    "commands": [
+      "skopeo copy --all docker://{{{depName}}}:{{{newValue}}} docker://harbor.internal.domain/mirror/{{{depName}}}:{{{newValue}}}"
+    ],
+    "fileFilters": ["**/*"],
+    "executionMode": "branch"
+  }
+}
