@@ -59,7 +59,7 @@ Key System Constraints:
 
 When creating, updating, or editing files in this repository, follow these rules:
 
-1. **No Emojis**: Do not use emojis in markdown documentation, code comments, or tool outputs.
+1. **No Emojis (STRICT REQUIREMENT)**: Absolutely do not use emojis in markdown documentation, headers, code comments, git commit messages, or tool outputs across this repository.
 2. **Declarative GitOps First**: All Kubernetes manifests must be declarative. Avoid imperative `kubectl create` in production manifests; store resources as version-controlled YAML.
 3. **Air-Gap Compliance**:
    - Ensure all container images reference internal registries (`harbor.internal.domain`).

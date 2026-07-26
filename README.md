@@ -4,7 +4,7 @@ An architecture, planning, and deployment repository for establishing an **autom
 
 ---
 
-## 🎯 Overview & Architecture
+### Overview & Architecture
 
 This security stack operates natively inside an air-gapped environment with **zero outbound internet access**. External artifacts (container images, Helm charts, and Trivy vulnerability database bundles) pass through a one-way unidirectional data diode into internal artifact stores (**Harbor** and **Nexus**).
 
@@ -45,7 +45,7 @@ This security stack operates natively inside an air-gapped environment with **ze
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```text
 .
@@ -85,22 +85,22 @@ This security stack operates natively inside an air-gapped environment with **ze
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### 1. Local Verification (Minikube / Test Cluster)
 
-Deploy Trivy Operator locally via Helm:
+Deploy Trivy Operator locally via Helm in offline mode:
 
 ```bash
 # Add Aqua Security Helm repository
 helm repo add aquasec https://aquasecurity.github.io/helm-charts
 helm repo update
 
-# Install Trivy Operator in trivy-system namespace
-helm install trivy-operator aquasec/trivy-operator \
+# Create namespace & install Trivy Operator in offline mode
+kubectl apply -f trivy/manifests/trivy-namespace.yaml
+helm upgrade --install trivy-operator aquasec/trivy-operator \
   --namespace trivy-system \
-  --create-namespace \
-  --set trivyOperator.metricsFindings.enabled=true
+  -f trivy/manifests/values-trivy-minikube-airgap.yaml
 ```
 
 ### 2. Generate Deduplicated Vulnerability Report
@@ -108,22 +108,22 @@ helm install trivy-operator aquasec/trivy-operator \
 Run the included report generator script to view a deduplicated summary of all Critical and High vulnerabilities:
 
 ```bash
-python3 security/generate-report.py
+python3 trivy/scripts/generate-report.py
 ```
 
 ### 3. Deploy Security Dashboard & Prometheus Rules
 
 ```bash
 # Deploy Grafana Dashboard & ServiceMonitor
-kubectl apply -f security-dashboard-setup.yaml
+kubectl apply -f trivy/manifests/security-dashboard-setup.yaml
 
 # Deploy Prometheus Alerting Rules
-kubectl apply -f security/trivy-prometheus-rules.yaml -n monitoring
+kubectl apply -f trivy/manifests/trivy-prometheus-rules.yaml -n monitoring
 ```
 
 ---
 
-## 📄 Documentation Sitemap
+## Documentation Sitemap
 
 * **[Directives & Governance](file:///home/jakob/Code/security-scan/docs/01-directives.md)**: Zero-outbound internet rules and architecture principles.
 * **[Prerequisites Specification](file:///home/jakob/Code/security-scan/docs/02-prerequisites.md)**: Infrastructure, Harbor, Nexus, and data diode pipeline requirements.
@@ -136,6 +136,6 @@ kubectl apply -f security/trivy-prometheus-rules.yaml -n monitoring
 
 ---
 
-## 🤖 Developer & Agent Guidance
+## Developer & Agent Guidance
 
 Refer to **[AGENTS.md](file:///home/jakob/Code/security-scan/AGENTS.md)** for developer conventions, formatting guidelines, and test playbooks when extending or modifying this repository.
