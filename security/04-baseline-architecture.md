@@ -70,7 +70,7 @@ trivy:
     repository: security/trivy
     tag: "0.52.0"
   
-  # Air-Gapped Local OCI DB Endpoints
+  # Air-Gapped Local OCI DB Endpoints (Trivy appends schema tag :2 for dbRepository and :1 for javaDbRepository automatically)
   dbRepository: harbor.internal.domain/mirror/aquasecurity/trivy-db
   javaDbRepository: harbor.internal.domain/mirror/aquasecurity/trivy-java-db
   

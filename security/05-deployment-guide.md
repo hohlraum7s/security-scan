@@ -48,6 +48,9 @@ helm pull aquasec/trivy-operator --version 0.22.0 -d ./charts/
 echo "==> Artifact preparation complete. Push artifacts across unidirectional diode."
 ```
 
+> [!NOTE]
+> The tag `:2` (`trivy-db:2`) and tag `:1` (`trivy-java-db:1`) represent database schema versions. Upstream CVE definitions are continuously updated under these exact tags. Always overwrite tag `:2` and `:1` in Harbor during sync operations, and ensure Harbor Tag Immutability rules do not block these repositories.
+
 ---
 
 ## Phase 2: GitOps Configuration Setup

@@ -1,0 +1,41 @@
+# values-trivy-minikube-airgap.yaml
+# Helm configuration for Trivy Operator with offline scanning mode enabled for Minikube testing.
+
+trivyOperator:
+  scanJobTimeout: "15m"
+  scanJobsConcurrentLimit: 3
+  metricsFindings:
+    enabled: true
+
+trivy:
+  # Enforce offline scanning mode (passes --offline-scan to Trivy CLI)
+  offlineScan: true
+
+  # Skip online database update checks since no internet egress is available
+  skipDBUpdate: true
+  skipJavaDBUpdate: true
+
+  # Execution mode for scan pods
+  mode: Standalone
+
+  # Severity filters for reported vulnerabilities
+  severity: "CRITICAL,HIGH,MEDIUM,LOW"
+
+  # Resource allocations for ephemeral scan pods
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+  # Optional production air-gap OCI DB repository overrides:
+  # dbRepository: "harbor.internal.domain/mirror/aquasecurity/trivy-db"
+  # javaDbRepository: "harbor.internal.domain/mirror/aquasecurity/trivy-java-db"
+
+operator:
+  scannerReportTTL: "24h"
+
+nodeSelector:
+  kubernetes.io/os: linux
